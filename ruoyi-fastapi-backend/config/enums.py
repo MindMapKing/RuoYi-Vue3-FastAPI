@@ -31,7 +31,8 @@ class BusinessType(Enum):
 
 class RedisInitKeyConfig(Enum):
     """
-    系统内置Redis键名
+    系统内置Redis键名，自定义枚举内部的值
+    @property 装饰器的作用是将方法转换为属性访问器
     """
 
     @property

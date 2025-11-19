@@ -39,6 +39,9 @@ class JwtSettings(BaseSettings):
 class DataBaseSettings(BaseSettings):
     """
     数据库配置
+        Literal用于定义可选择的值
+        @property是python标准的装饰器，将方法转为属性
+        @computed_filed是pydantic的装饰器，用于定义计算字段
     """
 
     db_type: Literal['mysql', 'postgresql'] = 'mysql'
@@ -206,6 +209,7 @@ class GetConfig:
     def parse_cli_args():
         """
         解析命令行参数
+        @staticmethod 用于定义静态方法
         """
         # 检查是否在alembic环境中运行，如果是则跳过参数解析
         if 'alembic' in sys.argv[0] or any('alembic' in arg for arg in sys.argv):

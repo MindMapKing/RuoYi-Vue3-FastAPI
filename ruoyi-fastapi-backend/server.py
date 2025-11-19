@@ -31,6 +31,17 @@ from utils.log_util import logger
 # 生命周期事件
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    FastAPI应用生命周期管理函数
+    在应用启动和关闭时执行初始化和清理操作
+
+    参数:
+        app: FastAPI应用实例
+
+    功能:
+        启动时: 初始化数据库表、创建Redis连接池、初始化系统字典和配置、启动系统调度器
+        关闭时: 关闭Redis连接池、停止系统调度器
+    """
     logger.info(f'⏰️ {AppConfig.app_name}开始启动')
     worship()
     await init_create_table()
@@ -78,8 +89,7 @@ controller_list = [
     {'router': serverController, 'tags': ['系统监控-菜单管理']},
     {'router': cacheController, 'tags': ['系统监控-缓存监控']},
     {'router': commonController, 'tags': ['通用模块']},
-    {'router': genController, 'tags': ['代码生成']},
-]
+    {'router': genController, 'tags': ['代码生成']},]
 
 for controller in controller_list:
     app.include_router(router=controller.get('router'), tags=controller.get('tags'))
