@@ -10,11 +10,12 @@ from config.database import Base
 
 
 class ImportUtil:
+
     @classmethod
     def find_project_root(cls) -> Path:
         """
         查找项目根目录
-
+        1、requirements.txt所在目录就是根目录
         :return: 项目根目录路径
         """
         current_dir = Path(__file__).resolve().parent
@@ -29,22 +30,48 @@ class ImportUtil:
         """
         验证是否为有效的SQLAlchemy模型类
 
-        :param obj: 待验证的对象
-        :param base_class: SQLAlchemy的Base类
-        :return: 验证结果
+        此方法用于验证给定的对象是否为一个有效的SQLAlchemy模型类，通过多重验证确保：
+        1. 对象必须是一个类且继承自指定的Base类
+        2. 不能是Base基类本身
+        3. 必须定义了表名（排除抽象基类）
+        4. 必须包含至少一个数据库列定义
+
+        Args:
+            obj (Any): 待验证的对象，可能是任何Python对象
+            base_class (Base): SQLAlchemy的声明基类，通常为declarative_base()的实例
+
+        Returns:
+            bool: 如果对象是有效的SQLAlchemy模型类返回True，否则返回False
+
+        Examples:
+            >>> from config.database import Base
+            >>> # 假设User是一个有效的模型类
+            >>> is_valid = ImportUtil.is_valid_model(User, Base)  # 返回 True
+            >>> # 假设SomeClass不是模型类
+            >>> is_valid = ImportUtil.is_valid_model(SomeClass, Base)  # 返回 False
+
+        Note:
+            此方法主要用于在模型发现过程中过滤掉无效的类定义，
+            确保只有真正的数据库模型类被包含在结果中。
         """
-        # 必须继承自Base且不是Base本身
+        # 第一步验证：检查对象类型和继承关系
+        # 确保对象是一个类，继承自指定的Base类，且不是Base基类本身
         if not (inspect.isclass(obj) and issubclass(obj, base_class) and obj is not base_class):
             return False
 
-        # 必须有表名定义（排除抽象基类）
+        # 第二步验证：检查表名定义
+        # 排除抽象基类（Abstract Base Class），抽象基类通常不定义__tablename__属性
         if not hasattr(obj, '__tablename__') or obj.__tablename__ is None:
             return False
 
-        # 必须有至少一个列定义
+        # 第三步验证：检查数据库列定义
+        # 使用SQLAlchemy的inspect工具检查模型是否包含实际的列定义
+        # 这是确保模型可以被正确映射到数据库表的关键验证
         try:
             return len(sa_inspect(obj).columns) > 0
         except Exception:
+            # 如果在检查列定义时发生任何异常（如模型定义不完整），
+            # 则认为该模型无效
             return False
 
     @classmethod

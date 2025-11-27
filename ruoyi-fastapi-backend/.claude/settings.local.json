@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr:*)",
+      "Bash(git restore:*)",
+      "Bash(javac:*)",
+      "Bash(mvn:*)",
+      "Bash(mcp list:*)",
+      "Bash(psql:*)",
+      "Bash(where psql)",
+      "Bash(java:*)",
+      "Bash(npx:*)",
+      "Bash(POSTGRES_CONNECTION_STRING=\"postgresql://topecdas:top%40123456@192.168.30.39:54321/topecdas\" npx:*)",
+      "Bash(jar:*)",
+      "Bash(python:*)",
+      "Bash(dir \"C:\\Users\\topnet\\Desktop\\安徽统计年鉴—2018\")",
+      "Bash(pip install:*)",
+      "Bash(dir \"D:\\Workspace\\Python\\WorkspaceForDemoBase\\demo-base\\processed_excels\")",
+      "Bash(dir:*)",
+      "Bash(move:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(playwright install:*)",
+      "Bash(cat:*)",
+      "Bash(del:*)",
+      "Bash(nul:*)",
+      "Bash(=2.0.1)",
+      "Bash(pip:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.microsoft.com)",
+      "WebFetch(domain:openpyxl.readthedocs.io)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
