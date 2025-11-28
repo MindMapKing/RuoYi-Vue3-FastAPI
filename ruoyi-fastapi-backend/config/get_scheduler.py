@@ -1,14 +1,26 @@
 import json
+# APScheduler 事件常量：监听所有类型的事件（执行、异常、提交等）
 from apscheduler.events import EVENT_ALL
+# 异步 IO 执行器：用于调度异步协程任务
 from apscheduler.executors.asyncio import AsyncIOExecutor
+# 进程池执行器：在独立进程中运行任务，隔离资源
 from apscheduler.executors.pool import ProcessPoolExecutor
+# 内存型任务存储：任务仅保存在内存，重启即丢失
 from apscheduler.jobstores.memory import MemoryJobStore
+# Redis 任务存储：将任务持久化到 Redis，支持分布式
 from apscheduler.jobstores.redis import RedisJobStore
+# SQLAlchemy 任务存储：将任务持久化到数据库，支持跨重启
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+# 异步 IO 调度器：基于 asyncio 的主调度引擎
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+# 组合触发器：可将多个触发器“或”在一起，满足其一即触发
 from apscheduler.triggers.combining import OrTrigger
+# Cron 触发器：按类 Unix crontab 表达式周期性触发
 from apscheduler.triggers.cron import CronTrigger
+# 一次性日期触发器：在指定时间点触发一次
 from apscheduler.triggers.date import DateTrigger
+# 引入 asyncio 的 iscoroutinefunction，用于判断一个函数是否为异步协程函数
+# 在 add_scheduler_job 与 execute_scheduler_job_once 中，若目标函数是协程，则强制使用 AsyncIOExecutor('default') 执行器
 from asyncio import iscoroutinefunction
 from datetime import datetime, timedelta
 from sqlalchemy.engine import create_engine
@@ -26,7 +38,12 @@ import module_task  # noqa: F401
 # 重写Cron定时
 class MyCronTrigger(CronTrigger):
     @classmethod
+    @classmethod
     def from_crontab(cls, expr: str, timezone=None):
+        """
+        类方法：将 6 或 7 位 crontab 表达式解析为 MyCronTrigger 实例。
+        cls 是类本身（MyCronTrigger），用于在类方法内部创建并返回当前类的实例。
+        """
         values = expr.split()
         if len(values) != 6 and len(values) != 7:
             raise ValueError('Wrong number of fields; got {}, expected 6 or 7'.format(len(values)))
@@ -99,6 +116,8 @@ engine = create_engine(
     pool_recycle=DataBaseConfig.db_pool_recycle,
     pool_timeout=DataBaseConfig.db_pool_timeout,
 )
+# SessionLocal 是一个 SQLAlchemy 的同步会话工厂，用于在同步代码（如 scheduler_event_listener）中
+# 获取数据库会话，以便将任务日志写入数据库。
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 job_stores = {
     'default': MemoryJobStore(),
@@ -232,6 +251,10 @@ class SchedulerUtil:
 
     @classmethod
     def scheduler_event_listener(cls, event):
+        """
+        APScheduler 事件监听器：当调度器产生任何事件（任务提交、执行成功、执行异常等）时被回调，
+        负责把事件的核心信息落库到 sys_job_log 表，方便后台查看任务执行历史与异常原因。
+        """
         # 获取事件类型和任务ID
         event_type = event.__class__.__name__
         # 获取任务执行异常信息

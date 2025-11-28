@@ -1,4 +1,6 @@
-from redis import asyncio as aioredis
+# asyncio 是 Python 内置的异步 I/O 框架，redis.asyncio 是 redis-py 官方提供的异步客户端
+# 它并不是 Redis 实例，而是用来创建支持 async/await 的 Redis 连接池/客户端的工具库
+from redis.asyncio import Redis
 from redis.exceptions import AuthenticationError, TimeoutError, RedisError
 from config.database import AsyncSessionLocal
 from config.env import RedisConfig
