@@ -1,5 +1,5 @@
-import argparse
-import configparser
+import argparse     # 用于解析命令行参数，支持从命令行读取 --env 等自定义参数
+import configparser  # 用于读取 alembic.ini 等 ini 格式配置文件，方便在 alembic 迁移时获取环境变量
 import os
 import sys
 from dotenv import load_dotenv
@@ -39,6 +39,9 @@ class JwtSettings(BaseSettings):
 class DataBaseSettings(BaseSettings):
     """
     数据库配置
+        Literal用于定义可选择的值
+        @property是python标准的装饰器，将方法转为属性
+        @computed_filed是pydantic的装饰器，用于定义计算字段
     """
 
     db_type: Literal['mysql', 'postgresql'] = 'mysql'
@@ -206,6 +209,7 @@ class GetConfig:
     def parse_cli_args():
         """
         解析命令行参数
+        @staticmethod 用于定义静态方法
         """
         # 检查是否在alembic环境中运行，如果是则跳过参数解析
         if 'alembic' in sys.argv[0] or any('alembic' in arg for arg in sys.argv):
@@ -233,7 +237,7 @@ class GetConfig:
         # 运行环境不为空时按命令行参数加载对应.env文件
         if run_env != '':
             env_file = f'.env.{run_env}'
-        # 加载配置
+        # 将配置加载到环境变量中
         load_dotenv(env_file)
 
 
